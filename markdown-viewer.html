@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Markdown 浏览器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f4ee;
+      --panel: #ffffff;
+      --ink: #1f2933;
+      --muted: #67727e;
+      --line: #d8ddd9;
+      --accent: #1b6b5f;
+      --accent-strong: #114d44;
+      --code-bg: #17212b;
+      --code-ink: #eef5f3;
+      --shadow: 0 18px 50px rgba(31, 41, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(246, 244, 238, 0.92);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .file-name {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    main {
+      width: min(1100px, calc(100vw - 32px));
+      margin: 28px auto 48px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .dropzone {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      padding: 36px 22px;
+      border: 2px dashed #9fb1aa;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      text-align: center;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .dropzone.dragging {
+      border-color: var(--accent);
+      background: #edf7f3;
+      transform: translateY(-1px);
+    }
+
+    .drop-title {
+      font-size: 22px;
+      font-weight: 750;
+    }
+
+    .drop-subtitle {
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    button,
+    .button {
+      appearance: none;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 650;
+      line-height: 1;
+      padding: 11px 14px;
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--accent-strong);
+    }
+
+    input[type="file"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .viewer {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-height: 420px;
+      padding: clamp(22px, 4vw, 48px);
+      overflow-wrap: anywhere;
+    }
+
+    .viewer.empty {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      box-shadow: none;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .markdown {
+      max-width: 840px;
+      margin: 0 auto;
+    }
+
+    .markdown > :first-child {
+      margin-top: 0;
+    }
+
+    .markdown > :last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown h1,
+    .markdown h2,
+    .markdown h3,
+    .markdown h4,
+    .markdown h5,
+    .markdown h6 {
+      margin: 1.45em 0 0.55em;
+      line-height: 1.25;
+      color: #14242f;
+    }
+
+    .markdown h1 {
+      font-size: 2.2rem;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.28em;
+    }
+
+    .markdown h2 {
+      font-size: 1.55rem;
+      border-bottom: 1px solid #e6e9e7;
+      padding-bottom: 0.22em;
+    }
+
+    .markdown h3 {
+      font-size: 1.22rem;
+    }
+
+    .markdown p,
+    .markdown ul,
+    .markdown ol,
+    .markdown blockquote,
+    .markdown table,
+    .markdown pre {
+      margin: 0 0 1em;
+    }
+
+    .markdown a {
+      color: var(--accent-strong);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.18em;
+    }
+
+    .markdown code {
+      border-radius: 4px;
+      background: #edf1ef;
+      color: #26343d;
+      padding: 0.12em 0.32em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    .markdown pre {
+      overflow: auto;
+      border-radius: 8px;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      padding: 16px;
+    }
+
+    .markdown pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: 0.9rem;
+    }
+
+    .markdown blockquote {
+      border-left: 4px solid #94b8ae;
+      color: #40515e;
+      padding: 4px 0 4px 16px;
+    }
+
+    .markdown ul,
+    .markdown ol {
+      padding-left: 1.45em;
+    }
+
+    .markdown li + li {
+      margin-top: 0.24em;
+    }
+
+    .markdown table {
+      width: 100%;
+      border-collapse: collapse;
+      display: block;
+      overflow-x: auto;
+      font-size: 0.95rem;
+    }
+
+    .markdown th,
+    .markdown td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .markdown th {
+      background: #eef3f0;
+      font-weight: 700;
+    }
+
+    .markdown img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .markdown hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 2em 0;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 680px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px;
+      }
+
+      .file-name {
+        width: 100%;
+        text-align: left;
+      }
+
+      main {
+        width: calc(100vw - 20px);
+        margin-top: 10px;
+      }
+
+      .dropzone {
+        padding: 24px 14px;
+      }
+
+      .drop-title {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Markdown 浏览器</h1>
+      <div class="file-name" id="fileName">未打开文件</div>
+    </header>
+
+    <main>
+      <section class="dropzone" id="dropzone" aria-label="拖拽 Markdown 文件到这里">
+        <div class="drop-title">拖拽 Markdown 文件到这里</div>
+        <div class="drop-subtitle">也可以选择单个 `.md` 文件，或选择包含 Markdown 和图片资源的文件夹。</div>
+        <div class="actions">
+          <label class="button" for="fileInput">选择文件</label>
+          <label class="button secondary" for="folderInput">选择文件夹</label>
+        </div>
+        <input id="fileInput" type="file" accept=".md,.markdown,.mdown,.txt,text/markdown,text/plain">
+        <input id="folderInput" type="file" webkitdirectory multiple>
+      </section>
+
+      <section class="viewer empty" id="viewer">
+        <div>打开文件后会在这里显示预览</div>
+      </section>
+      <div class="status" id="status">本工具只在浏览器本地读取文件，不上传内容。</div>
+    </main>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const folderInput = document.getElementById("folderInput");
+    const viewer = document.getElementById("viewer");
+    const fileName = document.getElementById("fileName");
+    const statusLine = document.getElementById("status");
+    const assetUrls = new Map();
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function isSafeUrl(url) {
+      const trimmed = url.trim();
+      return /^(https?:|mailto:|tel:|#|data:image\/)/i.test(trimmed) ||
+        !/^[a-z][a-z0-9+.-]*:/i.test(trimmed);
+    }
+
+    function assetUrl(rawUrl) {
+      const url = rawUrl.trim();
+      const clean = decodeURI(url.split("#")[0].split("?")[0]).replace(/^\.?\//, "");
+      return assetUrls.get(clean) || assetUrls.get(clean.split("/").pop()) || url;
+    }
+
+    function inlineMarkdown(text) {
+      let output = escapeHtml(text);
+
+      output = output.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g, (_, alt, src) => {
+        const url = assetUrl(src);
+        if (!isSafeUrl(url)) return escapeHtml(_);
+        return `<img alt="${escapeHtml(alt)}" src="${escapeHtml(url)}">`;
+      });
+
+      output = output.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g, (_, label, href) => {
+        const url = assetUrl(href);
+        if (!isSafeUrl(url)) return escapeHtml(label);
+        return `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${label}</a>`;
+      });
+
+      output = output.replace(/`([^`]+)`/g, "<code>$1</code>");
+      output = output.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      output = output.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+      output = output.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+      output = output.replace(/(^|[^_])_([^_\n]+)_/g, "$1<em>$2</em>");
+      output = output.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+      return output;
+    }
+
+    function tableHtml(lines) {
+      const rows = lines.map(line => line.trim().replace(/^\||\|$/g, "").split("|").map(cell => cell.trim()));
+      const header = rows[0] || [];
+      const body = rows.slice(2);
+      return `<table><thead><tr>${header.map(cell => `<th>${inlineMarkdown(cell)}</th>`).join("")}</tr></thead><tbody>` +
+        body.map(row => `<tr>${row.map(cell => `<td>${inlineMarkdown(cell)}</td>`).join("")}</tr>`).join("") +
+        "</tbody></table>";
+    }
+
+    function isTableSeparator(line) {
+      return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+    }
+
+    function renderMarkdown(markdown) {
+      const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+      const html = [];
+      let i = 0;
+
+      while (i < lines.length) {
+        const line = lines[i];
+
+        if (!line.trim()) {
+          i += 1;
+          continue;
+        }
+
+        const fence = line.match(/^```(\w+)?\s*$/);
+        if (fence) {
+          i += 1;
+          const code = [];
+          while (i < lines.length && !/^```\s*$/.test(lines[i])) {
+            code.push(lines[i]);
+            i += 1;
+          }
+          if (i < lines.length) i += 1;
+          const language = fence[1] ? ` class="language-${escapeHtml(fence[1])}"` : "";
+          html.push(`<pre><code${language}>${escapeHtml(code.join("\n"))}</code></pre>`);
+          continue;
+        }
+
+        const heading = line.match(/^(#{1,6})\s+(.+)$/);
+        if (heading) {
+          const level = heading[1].length;
+          html.push(`<h${level}>${inlineMarkdown(heading[2].trim())}</h${level}>`);
+          i += 1;
+          continue;
+        }
+
+        if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+          html.push("<hr>");
+          i += 1;
+          continue;
+        }
+
+        if (i + 1 < lines.length && line.includes("|") && isTableSeparator(lines[i + 1])) {
+          const tableLines = [line, lines[i + 1]];
+          i += 2;
+          while (i < lines.length && lines[i].includes("|") && lines[i].trim()) {
+            tableLines.push(lines[i]);
+            i += 1;
+          }
+          html.push(tableHtml(tableLines));
+          continue;
+        }
+
+        if (/^\s*>\s?/.test(line)) {
+          const quote = [];
+          while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
+            quote.push(lines[i].replace(/^\s*>\s?/, ""));
+            i += 1;
+          }
+          html.push(`<blockquote>${renderMarkdown(quote.join("\n"))}</blockquote>`);
+          continue;
+        }
+
+        if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
+          const ordered = /^\s*\d+\.\s+/.test(line);
+          const tag = ordered ? "ol" : "ul";
+          const itemPattern = ordered ? /^\s*\d+\.\s+/ : /^\s*[-*+]\s+/;
+          const items = [];
+          while (i < lines.length && itemPattern.test(lines[i])) {
+            items.push(lines[i].replace(itemPattern, ""));
+            i += 1;
+          }
+          html.push(`<${tag}>${items.map(item => `<li>${inlineMarkdown(item)}</li>`).join("")}</${tag}>`);
+          continue;
+        }
+
+        const paragraph = [line.trim()];
+        i += 1;
+        while (
+          i < lines.length &&
+          lines[i].trim() &&
+          !/^```/.test(lines[i]) &&
+          !/^(#{1,6})\s+/.test(lines[i]) &&
+          !/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i]) &&
+          !/^\s*>\s?/.test(lines[i]) &&
+          !/^\s*[-*+]\s+/.test(lines[i]) &&
+          !/^\s*\d+\.\s+/.test(lines[i])
+        ) {
+          paragraph.push(lines[i].trim());
+          i += 1;
+        }
+        html.push(`<p>${inlineMarkdown(paragraph.join(" "))}</p>`);
+      }
+
+      return `<article class="markdown">${html.join("\n")}</article>`;
+    }
+
+    function rememberAssets(files) {
+      for (const file of files) {
+        const path = file.webkitRelativePath || file.name;
+        if (!path || /\.(md|markdown|mdown|txt)$/i.test(file.name)) continue;
+        const url = URL.createObjectURL(file);
+        assetUrls.set(path.replace(/^\.?\//, ""), url);
+        assetUrls.set(file.name, url);
+      }
+    }
+
+    async function openMarkdownFile(file, filesForAssets = []) {
+      if (!file) return;
+      rememberAssets(filesForAssets);
+      const text = await file.text();
+      viewer.classList.remove("empty");
+      viewer.innerHTML = renderMarkdown(text);
+      fileName.textContent = file.webkitRelativePath || file.name;
+      statusLine.textContent = `${file.name} · ${new Intl.NumberFormat("zh-CN").format(text.length)} 字符`;
+    }
+
+    function firstMarkdownFile(files) {
+      return [...files].find(file => /\.(md|markdown|mdown)$/i.test(file.name)) ||
+        [...files].find(file => /\.txt$/i.test(file.name));
+    }
+
+    fileInput.addEventListener("change", () => {
+      openMarkdownFile(fileInput.files[0], fileInput.files);
+      fileInput.value = "";
+    });
+
+    folderInput.addEventListener("change", () => {
+      const file = firstMarkdownFile(folderInput.files);
+      if (file) openMarkdownFile(file, folderInput.files);
+      folderInput.value = "";
+    });
+
+    for (const eventName of ["dragenter", "dragover"]) {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        dropzone.classList.add("dragging");
+      });
+    }
+
+    for (const eventName of ["dragleave", "drop"]) {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        dropzone.classList.remove("dragging");
+      });
+    }
+
+    dropzone.addEventListener("drop", event => {
+      const files = event.dataTransfer.files;
+      const file = firstMarkdownFile(files);
+      if (file) {
+        openMarkdownFile(file, files);
+      } else {
+        statusLine.textContent = "没有找到 Markdown 文件。";
+      }
+    });
+  </script>
+</body>
+</html>
