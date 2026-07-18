@@ -43,16 +43,16 @@ http://127.0.0.1:8000/markdown-viewer.html
 .
 ├── assets/
 │   └── logo.png          # 512 × 512 品牌图标
-├── apple-touch-icon.png  # iOS 主屏幕图标
-├── favicon-32.png        # 浏览器标签页与书签图标
-├── favicon-192.png       # 高分辨率浏览器图标
+├── apple-icon.png        # iOS 主屏幕图标
+├── favicon.ico           # 浏览器标签页与书签图标
+├── icon.png              # 192 × 192 高分辨率图标
 ├── markdown-viewer.html  # 完整应用，样式与脚本均内嵌
 └── README.md             # 中文使用与维护说明
 ```
 
 ## Logo
 
-图标沿用页面的米白、墨绿和深蓝配色，以文件页、折角和双下箭头组成。大尺寸源图保存在 `assets/logo.png`，浏览器和移动设备使用根目录中的各尺寸 PNG。
+图标沿用页面的米白、墨绿和深蓝配色，以文件页、折角和双下箭头组成。大尺寸源图保存在 `assets/logo.png`，浏览器使用 `favicon.ico`，高分辨率浏览器与移动设备分别使用 `icon.png` 和 `apple-icon.png`。
 
 ## 部署
 
