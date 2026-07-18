@@ -52,7 +52,7 @@ http://127.0.0.1:8000/markdown-viewer.html
 
 ## Logo
 
-图标沿用页面的米白、墨绿和深蓝配色，以文件页、折角和双下箭头组成。大尺寸源图保存在 `assets/logo.png`，浏览器使用 `favicon.ico`，高分辨率浏览器与移动设备分别使用 `icon.png` 和 `apple-icon.png`。
+图标沿用页面的米白、墨绿和深蓝配色，以文件页、折角和双下箭头组成。大尺寸源图保存在 `assets/logo.png`，仓库同时提供 `favicon.ico`、`icon.png` 和 `apple-icon.png`。生产 HTML 将 32 × 32 PNG 直接内嵌为 favicon，避免依赖宿主站点的认证和静态资源路由。
 
 ## 部署
 
@@ -62,7 +62,7 @@ http://127.0.0.1:8000/markdown-viewer.html
 /root/ArianaRealm/public/markdown-viewer.html
 ```
 
-该路径只是现有静态托管位置，本项目不依赖 Ariana Realm 的业务代码。后续维护以本仓库为唯一源码来源：先在仓库修改和验证，再将 HTML 与 favicon 资源部署到静态托管位置，最后检查公开 URL 和文件哈希。
+该路径只是现有静态托管位置，本项目不依赖 Ariana Realm 的业务代码。后续维护以本仓库为唯一源码来源：先在仓库修改和验证，再部署内嵌 favicon 的 HTML；迁移到独立静态主机时可同时部署仓库中的标准图标文件。发布后检查公开 URL、内嵌图标和文件哈希。
 
 ## 验证
 
