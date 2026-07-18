@@ -4,6 +4,8 @@
 
 线上地址：<http://43.159.50.227/markdown-viewer.html>
 
+![Markdown 浏览器 Logo](./assets/logo.png)
+
 ## 功能
 
 - 拖拽或选择单个 `.md`、`.markdown`、`.mdown` 或文本文件
@@ -39,9 +41,18 @@ http://127.0.0.1:8000/markdown-viewer.html
 
 ```text
 .
+├── assets/
+│   └── logo.png          # 512 × 512 品牌图标
+├── apple-touch-icon.png  # iOS 主屏幕图标
+├── favicon-32.png        # 浏览器标签页与书签图标
+├── favicon-192.png       # 高分辨率浏览器图标
 ├── markdown-viewer.html  # 完整应用，样式与脚本均内嵌
 └── README.md             # 中文使用与维护说明
 ```
+
+## Logo
+
+图标沿用页面的米白、墨绿和深蓝配色，以文件页、折角和双下箭头组成。大尺寸源图保存在 `assets/logo.png`，浏览器和移动设备使用根目录中的各尺寸 PNG。
 
 ## 部署
 
@@ -51,7 +62,7 @@ http://127.0.0.1:8000/markdown-viewer.html
 /root/ArianaRealm/public/markdown-viewer.html
 ```
 
-该路径只是现有静态托管位置，本项目不依赖 Ariana Realm 的业务代码。后续维护以本仓库为唯一源码来源：先在仓库修改和验证，再将 `markdown-viewer.html` 部署到静态托管位置，最后检查公开 URL 和文件哈希。
+该路径只是现有静态托管位置，本项目不依赖 Ariana Realm 的业务代码。后续维护以本仓库为唯一源码来源：先在仓库修改和验证，再将 HTML 与 favicon 资源部署到静态托管位置，最后检查公开 URL 和文件哈希。
 
 ## 验证
 
