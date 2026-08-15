@@ -1,85 +1,95 @@
-# Markdown 浏览器
+# Markdown Viewer
 
-一个零依赖、单文件的 Markdown 本地预览器。将 Markdown 文件拖进浏览器，即可在本机完成渲染与阅读。
+<p align="center">
+  <img src="assets/logo.png" width="112" height="112" alt="Markdown Viewer icon">
+</p>
 
-![Markdown 浏览器 Logo](./assets/logo.png)
+<p align="center">
+  <b>English</b> | <a href="README.zh-CN.md">简体中文</a>
+</p>
 
-## 功能
+A zero-dependency, single-file Markdown viewer. Drop a Markdown file into your browser and read it locally — rendering never leaves your machine.
 
-- 拖拽或选择单个 `.md`、`.markdown`、`.mdown` 或文本文件
-- 选择包含 Markdown 与图片资源的文件夹
-- 渲染标题、段落、粗体、斜体、删除线、行内代码、代码块
-- 渲染链接、图片、引用、有序/无序列表和表格
-- 自动解析所选文件夹中的相对图片路径
-- 响应式布局，适配桌面端和移动端
+![Markdown Viewer logo](./assets/logo.png)
 
-## 隐私
+## Features
 
-Markdown 文件通过浏览器 File API 在本地读取，应用本身没有上传接口。请注意：如果文档引用了远程图片或链接，浏览器仍可能访问对应的外部地址。
+- Drag and drop or pick a single `.md`, `.markdown`, `.mdown` or plain-text file
+- Pick a folder containing Markdown files and image assets
+- Renders headings, paragraphs, bold, italic, strikethrough, inline code and code blocks
+- Renders links, images, blockquotes, ordered/unordered lists and tables
+- Resolves relative image paths against the selected folder
+- Responsive layout for desktop and mobile
 
-## 使用方法
+## Privacy
 
-### 直接打开
+Markdown files are read locally through the browser File API; the app itself has no upload endpoint. Note: if a document references remote images or links, the browser may still request those external addresses.
 
-下载 [`markdown-viewer.html`](./markdown-viewer.html)，用现代浏览器打开，然后拖入 Markdown 文件。
+## Usage
 
-### 本地 HTTP 预览
+### Open directly
+
+Download [`markdown-viewer.html`](./markdown-viewer.html), open it in a modern browser, then drag in a Markdown file.
+
+### Local HTTP preview
 
 ```bash
 python3 -m http.server 8000
 ```
 
-浏览器访问：
+Then visit:
 
 ```text
 http://127.0.0.1:8000/markdown-viewer.html
 ```
 
-## 项目结构
+## Project layout
 
 ```text
 .
 ├── assets/
-│   └── logo.png          # 512 × 512 品牌图标
-├── apple-icon.png        # iOS 主屏幕图标
-├── favicon.ico           # 浏览器标签页与书签图标
-├── icon.png              # 192 × 192 高分辨率图标
-├── markdown-viewer.html  # 完整应用，样式与脚本均内嵌
-└── README.md             # 中文使用与维护说明
+│   └── logo.png          # 512 × 512 brand icon
+├── apple-icon.png        # iOS home-screen icon
+├── favicon.ico           # browser tab and bookmark icon
+├── icon.png              # 192 × 192 high-resolution icon
+├── markdown-viewer.html  # the whole app, styles and scripts inlined
+├── README.md             # English documentation
+└── README.zh-CN.md       # Chinese documentation
 ```
 
 ## Logo
 
-图标沿用页面的米白、墨绿和深蓝配色，以文件页、折角和双下箭头组成。大尺寸源图保存在 `assets/logo.png`，仓库同时提供 `favicon.ico`、`icon.png` 和 `apple-icon.png`。生产 HTML 将 32 × 32 PNG 直接内嵌为 favicon，避免依赖宿主站点的认证和静态资源路由。
+The icon keeps the page's cream, ink-green and deep-blue palette, built from a document sheet, a folded corner and a double down-arrow. The full-size source lives in `assets/logo.png`; the repo also ships `favicon.ico`, `icon.png` and `apple-icon.png`. The production HTML embeds a 32 × 32 PNG as its favicon so it never depends on the hosting site's auth or static-asset routing.
 
-## 部署
+## Deployment
 
-当前生产页面部署在腾讯云服务器 `tengxun`：
+The entire app is one static HTML file — host it on any static server:
 
-```text
-/root/ArianaRealm/public/markdown-viewer.html
+```bash
+# Example: after copying it into any static directory
+python3 -m http.server 8000
 ```
 
-该路径只是现有静态托管位置，本项目不依赖 Ariana Realm 的业务代码。后续维护以本仓库为唯一源码来源：先在仓库修改和验证，再部署内嵌 favicon 的 HTML；迁移到独立静态主机时可同时部署仓库中的标准图标文件。发布后检查公开 URL、内嵌图标和文件哈希。
+When migrating or self-hosting, deploy `markdown-viewer.html` together with the standard icon files (`favicon.ico`, `icon.png`, `apple-icon.png`). The HTML already embeds its favicon; the icon files cover hosts that need standalone static assets.
 
-## 验证
+## Verification
 
-检查 HTML 语法与关键功能后，可计算本地文件哈希用于部署前后核对：
+After checking HTML syntax and key features, compute the local file hash to compare before and after deployment:
 
 ```bash
 shasum -a 256 markdown-viewer.html
 ```
 
-## 已知边界
+## Known limitations
 
-- 使用内置的轻量 Markdown 解析器，不保证覆盖完整 CommonMark/GFM 规范
-- 选择文件夹时只打开找到的第一个 Markdown 文件
-- 不提供编辑、保存、同步或多人协作功能
-- 不执行 Markdown 中的原始 HTML 或脚本
+- Uses the built-in lightweight Markdown parser; full CommonMark/GFM coverage is not guaranteed
+- When picking a folder, only the first Markdown file found is opened
+- No editing, saving, syncing or collaboration features
+- Raw HTML or scripts inside Markdown are not executed
 
-## 维护约定
+## Maintenance conventions
 
-- 仓库内容是源码真相，服务器文件仅是部署副本
-- 不在服务器上直接开发
-- 发布前检查敏感信息、HTML 语法和浏览器行为
-- 发布后验证公开页面状态与 SHA-256
+- The repository is the source of truth; server copies are deployment artifacts only
+- No development directly on the server
+- Before release: check for sensitive information, HTML syntax and browser behavior
+- After release: verify the public page status and its SHA-256
