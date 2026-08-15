@@ -2,8 +2,6 @@
 
 一个零依赖、单文件的 Markdown 本地预览器。将 Markdown 文件拖进浏览器，即可在本机完成渲染与阅读。
 
-线上地址：<http://43.159.50.227/markdown-viewer.html>
-
 ![Markdown 浏览器 Logo](./assets/logo.png)
 
 ## 功能
@@ -66,11 +64,10 @@ http://127.0.0.1:8000/markdown-viewer.html
 
 ## 验证
 
-检查 HTML 语法与关键功能后，可核对本地文件和线上响应是否一致：
+检查 HTML 语法与关键功能后，可计算本地文件哈希用于部署前后核对：
 
 ```bash
 shasum -a 256 markdown-viewer.html
-curl -fsS http://43.159.50.227/markdown-viewer.html | shasum -a 256
 ```
 
 ## 已知边界
